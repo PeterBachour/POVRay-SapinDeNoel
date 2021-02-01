@@ -26,4 +26,22 @@ background {White}								    // fond d'ecran blanc
         }
 }
 
-object{tronc}										//affichage du tronc
+//object{tronc}										//affichage du tronc
+#declare conee=object{
+	cone{
+			<0,0,6> 							// location of base point
+			6		 							// base point radius
+			<0,0,9> 							// location of cap point
+			0		 							// cap point radius 
+			pigment{Jade}						// color of leaves
+		}
+}
+
+#declare sapin=object{
+	union {										//union of objects
+		object{tronc}
+		object{conee}	
+	}
+}
+
+object{sapin}
