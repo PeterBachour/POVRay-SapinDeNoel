@@ -20,7 +20,7 @@ background {White}								    // fond d'ecran blanc
 #declare hauteur=6;
 #declare rayon=6; 
 #declare ecartHauteur=hauteur/2;
-#declare nombreDeCone=4; 
+#declare nombreDeCone=6; 
 #declare i=0;
 
 #declare sapin=object{								// creation du sapin
@@ -35,9 +35,9 @@ background {White}								    // fond d'ecran blanc
 	       #while(i< nombreDeCone)
 		        cone{											//creation du cone
 					<0,0,hauteur+ecartHauteur*i> 		// location of base point
-					rayon	 								// base point radius
+					rayon*(1-i/nombreDeCone)			// base point radius
 					<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
-					0		 								// cap point radius 
+					1-(1+i)/nombreDeCone				// cap point radius 
 					pigment{Jade}							// color of leaves
 				}
 	        
