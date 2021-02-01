@@ -17,30 +17,33 @@ light_source { <-0.4*sca,1*sca,14.5> White }       	// light source
 
 background {White}								    // fond d'ecran blanc
 
-#declare tronc=object{								// creation du tronc
-  cylinder{											// creation du cylindre qui est la base du tronc
-            <0,0,-1>								// position du cylindre
-            <0,0,6>									// mesure du cylindre
-            1										// rayon du cylindre
-            texture {DMFDarkOak scale 0.1}			// texture que le cylindre va prendre
-        }
-}
+#declare hauteur=6;
+#declare rayon=6; 
+#declare ecartHauteur=hauteur/2;
+#declare nombreDeCone=4; 
+#declare i=0;
 
-//object{tronc}										//affichage du tronc
-#declare conee=object{
-	cone{
-			<0,0,6> 							// location of base point
-			6		 							// base point radius
-			<0,0,9> 							// location of cap point
-			0		 							// cap point radius 
-			pigment{Jade}						// color of leaves
-		}
-}
-
-#declare sapin=object{
-	union {										//union of objects
-		object{tronc}
-		object{conee}	
+#declare sapin=object{								// creation du sapin
+	union{
+		  cylinder{											// creation du cylindre qui est la base du tronc
+		            <0,0,-1>								// position du cylindre
+		            <0,0,hauteur>									// mesure du cylindre
+		            1										// rayon du cylindre
+		            texture {DMFDarkOak scale 0.1}			// texture que le cylindre va prendre
+	        	}
+	       union {
+	       #while(i< nombreDeCone)
+		        cone{											//creation du cone
+					<0,0,hauteur+ecartHauteur*i> 		// location of base point
+					rayon	 								// base point radius
+					<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
+					0		 								// cap point radius 
+					pigment{Jade}							// color of leaves
+				}
+	        
+	        #declare i=i+1;
+	        #end
+	       }
 	}
 }
 
