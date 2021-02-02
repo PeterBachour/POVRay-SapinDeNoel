@@ -46,7 +46,7 @@ background {White}								  	  // fond d'ecran blanc
 							pigment{Jade}							// color of leaves
 					}
 					#declare j=0;
-					#while(j<nombreDeCylindre)	
+					#while(j<nombreDeCylindre)				//nombre de cylindre a enlever
 						cylinder{ 
 							<	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeCylindre),  //position du cylindre a enlever
 								(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeCylindre),
@@ -76,6 +76,11 @@ background {White}								  	  // fond d'ecran blanc
              #declare rot=2*Pi/nombreDeBoule/2;
 	       #declare i=i+1;
 	       #end
+	       sphere{										//creation des boules rouges
+			     	<	0, 0, hauteur+nombreDeCone*ecartHauteur >  //position de la boule au sommet
+	     		 		0.5				
+					pigment { Black}
+	                  }
 	} 
 	
 }
