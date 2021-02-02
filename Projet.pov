@@ -27,10 +27,24 @@ background {White}								  	  // fond d'ecran blanc
 #declare nombreDeBoule=30;
 #declare nombreDeCylindre=nombreDeBoule;
 #declare rot=2*Pi/nombreDeBoule/2;
-#declare rFicelle = 0.06;
+#declare rFicelle = 0.06; 
+
+//ne pas multiplier 
+#macro B-spline5(step,PO,P1,P2,P3,P4)
+	(pow(1-step,4)*P0+4*step*pow(1-step,3)*P1+4*pow(step,2)*pow(1-step,2)*P2+4*pow(step,3)*(1-step)*P3+pow(step,4)*P4);
+#end
+
+#macro B-spline2(step,PO,P1,P2)
+	(pow((1-step),2)*P0+2*(1-step)*step*P1+step*step*P2);
+#end
 
 #declare sapin=object{									// creation du sapin
-	union{
+
+
+		
+
+	union{         
+
 				  cylinder{											// creation du cylindre qui est la base du tronc
 				            <0,0,-1>									// position du cylindre
 				            <0,0,hauteur>								// mesure du cylindre
