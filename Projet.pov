@@ -22,6 +22,10 @@ background {White}								    // fond d'ecran blanc
 #declare ecartHauteur=hauteur/2;
 #declare nombreDeCone=6; 
 #declare i=0;
+#declare Pi=3.1415;
+#declare rot=2*Pi/20/2;
+#declare rBoul=0.35;
+#declare nombreDeBoule=25;
 
 #declare sapin=object{								// creation du sapin
 	union{
@@ -40,7 +44,18 @@ background {White}								    // fond d'ecran blanc
 					1-(1+i)/nombreDeCone				// cap point radius 
 					pigment{Jade}							// color of leaves
 				}
-	        
+				#declare j=0;
+				#while(j<nombreDeBoule)
+	     		 sphere{
+	     		 	<	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
+	     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+	     		 		hauteur+i*ecartHauteur > 
+	     		 	rBoul/(i+1)
+                            pigment {Red}
+                        }
+                        #declare j=j+1;
+                        #end
+              #declare nombreDeBoule = nombreDeBoule-3;
 	        #declare i=i+1;
 	        #end
 	       }
