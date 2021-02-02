@@ -27,6 +27,7 @@ background {White}								  	  // fond d'ecran blanc
 #declare nombreDeBoule=30;
 #declare nombreDeCylindre=nombreDeBoule;
 #declare rot=2*Pi/nombreDeBoule/2;
+#declare rFicelle = 0.06
 
 #declare sapin=object{									// creation du sapin
 	union{
@@ -69,7 +70,11 @@ background {White}								  	  // fond d'ecran blanc
 			#declare j=0;
 			union {
 				#while(j<nombreDeBoule)						//ajout de nombreDeBoule Boule
-		     		sphere{										//creation des boules rouges
+		     		union {
+						 
+					 
+					 union {
+					 sphere{										//creation des boules rouges
 			     		 	<	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
 			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
 			     		 		hauteur+i*ecartHauteur > 
@@ -82,9 +87,25 @@ background {White}								  	  // fond d'ecran blanc
 			     		 		hauteur+i*ecartHauteur > 
  						<	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
 			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
-			     		 		hauteur+i*ecartHauteur-1 > 	                  							0.06
+			     		 		hauteur+i*ecartHauteur-1 >
+								rFicelle
 	                  		pigment {Black}
 	                  }
+
+					  lathe{
+
+						  bezier_spline
+						  4,
+						  <0, -5 >, <3, -2 >, <3, 0 >, <rFicelle, 2 >
+						  pigment {Blue}
+						  rotate <90, 0, 0> // <x°, y°, z°>
+						  scale <0.1, 0.1, 0.1> // <x, y, z>
+						  translate <(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
+			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+			     		 		hauteur+i*ecartHauteur-1 > // <x, y, z>
+					  }
+					 }
+					}
 	                  #declare j=j+1;
                   #end
 			}
