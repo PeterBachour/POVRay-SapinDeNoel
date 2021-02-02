@@ -27,7 +27,7 @@ background {White}								  	  // fond d'ecran blanc
 #declare nombreDeBoule=30;
 #declare nombreDeCylindre=nombreDeBoule;
 #declare rot=2*Pi/nombreDeBoule/2;
-#declare rFicelle = 0.06
+#declare rFicelle = 0.06;
 
 #declare sapin=object{									// creation du sapin
 	union{
@@ -71,40 +71,116 @@ background {White}								  	  // fond d'ecran blanc
 			union {
 				#while(j<nombreDeBoule)						//ajout de nombreDeBoule Boule
 		     		union {
-						 
+					#declare rayonJ = 	 rayon*(1-i/nombreDeCone);
 					 
 					 union {
 					 sphere{										//creation des boules rouges
-			     		 	<	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
-			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+			     		 	<	rayonJ*cos (2*Pi*j/nombreDeBoule+rot),
+			     		 		rayonJ*sin(2*Pi*j/nombreDeBoule+rot),
 			     		 		hauteur+i*ecartHauteur > 
-				     		 	rayonDeBoule				
+				     		 	rayonDeBoule/2+rayonDeBoule/(i+1)				
 		                            pigment {Red} finish{diffuse 10}
-	                  }
+	                  		}	
 	                  cylinder {
-	                 			 <	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
-			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+	                 			 <	rayonJ*cos (2*Pi*j/nombreDeBoule+rot),
+			     		 		rayonJ*sin(2*Pi*j/nombreDeBoule+rot),
 			     		 		hauteur+i*ecartHauteur > 
- 						<	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
-			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
-			     		 		hauteur+i*ecartHauteur-1 >
+ 						<	rayonJ*cos (2*Pi*j/nombreDeBoule+rot),
+			     		 		rayonJ*sin(2*Pi*j/nombreDeBoule+rot),
+			     		 		hauteur+i*ecartHauteur-0.7 >
 								rFicelle
 	                  		pigment {Black}
-	                  }
-
+	                 	}
+					 }
+					 #if( mod(i,3)=0)
+					 union {
+						  lathe{
+	
+							  bezier_spline
+							  4,
+							  <0, -5 >, <3, -2 >, <3, 0 > , <3, 0.5>										  pigment {color rgbt<0,0.4,0.4,0.3>}
+							  rotate <90, 0, 0> // <x°, y°, z°>
+							  scale <0.1, 0.1, 0.1> // <x, y, z>
+							  translate <(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
+				     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+				     		 		hauteur+i*ecartHauteur-0.7-0.2 > // <x, y, z>
+						  
+						 }
+						 lathe{
+	
+							  bezier_spline
+							  4,
+							  <3, 0.5>, <2, 2 >, <2, 1 >, <rFicelle*10, 2 >
+							  pigment {color rgbt<0.4,0.4,0,0.3>}
+							  rotate <90, 0, 0> // <x°, y°, z°>
+							  scale <0.1, 0.1, 0.1> // <x, y, z>
+							  translate <(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
+				     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+				     		 		hauteur+i*ecartHauteur-0.7-0.2 > // <x, y, z>
+						  
+						 }
+					 }
+					 #end
+					 #if( mod(i,3)=1)
+					  union {
+						  lathe{
+	
+							  bezier_spline
+							  4,
+							  <1, -5 >, <2, -4 >, <2, -3 > , <1, -2>										  pigment {color rgbt<0.4,1,0.4,0.3>}
+							  rotate <90, 0, 0> // <x°, y°, z°>
+							  scale <0.1, 0.1, 0.1> // <x, y, z>
+							  translate <(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
+				     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+				     		 		hauteur+i*ecartHauteur-0.7-0.2 > // <x, y, z>
+						  
+						 }
+						 lathe{
+	
+							  bezier_spline
+							  4,
+							  <1, -2>, <3, -1 >, <3, 0 >, <rFicelle*10, 2 >
+							  pigment {color rgbt<0,0.4,1,0.3>}
+							  rotate <90, 0, 0> // <x°, y°, z°>
+							  scale <0.1, 0.1, 0.1> // <x, y, z>
+							  translate <(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
+				     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+				     		 		hauteur+i*ecartHauteur-0.7-0.2 > // <x, y, z>
+						  
+						 }
+					 }
+					 #end
+					  #if( mod(i,3)=2)
+					  union{
 					  lathe{
 
 						  bezier_spline
 						  4,
-						  <0, -5 >, <3, -2 >, <3, 0 >, <rFicelle, 2 >
-						  pigment {Blue}
+						  <0, -2 >, <1, -1>, <2, 0 >, <3,0>
+						  pigment {color rgbt<0.3,0,0.6,0.3>}
 						  rotate <90, 0, 0> // <x°, y°, z°>
 						  scale <0.1, 0.1, 0.1> // <x, y, z>
 						  translate <(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
 			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
-			     		 		hauteur+i*ecartHauteur-1 > // <x, y, z>
-					  }
+			     		 		hauteur+i*ecartHauteur-0.7-0.2 > // <x, y, z>
+					  
 					 }
+					  lathe{
+
+						  bezier_spline
+						  4,
+						  <3, 0 >, <3, 1>, <2, 2 >, <rFicelle*10, 2 >
+						  pigment {color rgbt<0.3,1,0.6,0.3>}
+						  rotate <90, 0, 0> // <x°, y°, z°>
+						  scale <0.1, 0.1, 0.1> // <x, y, z>
+						  translate <(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
+			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+			     		 		hauteur+i*ecartHauteur-0.7-0.2 > // <x, y, z>
+					  
+					 }
+					  }
+					 #end
+
 					}
 	                  #declare j=j+1;
                   #end
