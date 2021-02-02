@@ -44,7 +44,6 @@ background {White}								  	  // fond d'ecran blanc
 							rayon*(1-i/nombreDeCone)			// base point radius
 							<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
 							1-(1+i)/nombreDeCone				// cap point radius 
-							pigment{Jade}							// color of leaves
 					   }
 
 					}
@@ -63,7 +62,8 @@ background {White}								  	  // fond d'ecran blanc
 		                        #declare j=j+1;
                   		#end  
 					}
- 
+ 							pigment{Jade}							// color of leaves
+
 	       	}
 		
 			#declare j=0;
@@ -75,6 +75,15 @@ background {White}								  	  // fond d'ecran blanc
 			     		 		hauteur+i*ecartHauteur > 
 				     		 	rayonDeBoule				
 		                            pigment {Red} finish{diffuse 10}
+	                  }
+	                  cylinder {
+	                 			 <	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
+			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+			     		 		hauteur+i*ecartHauteur > 
+ 						<	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
+			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
+			     		 		hauteur+i*ecartHauteur-1 > 	                  							0.06
+	                  		pigment {Black}
 	                  }
 	                  #declare j=j+1;
                   #end
