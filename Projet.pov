@@ -38,15 +38,19 @@ background {White}								  	  // fond d'ecran blanc
 			        	}
        #while(i< nombreDeCone)
 		       difference {
-				      cone{											//creation du cone
+				   	union {
+							cone{											//creation du cone
 							<0,0,hauteur+ecartHauteur*i> 		// location of base point
 							rayon*(1-i/nombreDeCone)			// base point radius
 							<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
 							1-(1+i)/nombreDeCone				// cap point radius 
 							pigment{Jade}							// color of leaves
+					   }
+
 					}
 					#declare j=0;
-					#while(j<nombreDeCylindre)				//nombre de cylindre a enlever
+					union {
+						#while(j<nombreDeCylindre)				//nombre de cylindre a enlever
 						cylinder{ 
 							<	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeCylindre),  //position du cylindre a enlever
 								(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeCylindre),
@@ -57,11 +61,14 @@ background {White}								  	  // fond d'ecran blanc
 				                        ((1-(i)/nombreDeCone))/8					//rayon du cylindre a enlever
 		                        }
 		                        #declare j=j+1;
-                  		#end   
+                  		#end  
+					}
+ 
 	       	}
 		
 			#declare j=0;
-			#while(j<nombreDeBoule)						//ajout de nombreDeBoule Boule
+			union {
+				#while(j<nombreDeBoule)						//ajout de nombreDeBoule Boule
 		     		sphere{										//creation des boules rouges
 			     		 	<	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
 			     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
@@ -71,6 +78,7 @@ background {White}								  	  // fond d'ecran blanc
 	                  }
 	                  #declare j=j+1;
                   #end
+			}
              #declare nombreDeBoule = nombreDeBoule-5;
              #declare nombreDeCylindre=nombreDeBoule;
              #declare rot=2*Pi/nombreDeBoule/2;
