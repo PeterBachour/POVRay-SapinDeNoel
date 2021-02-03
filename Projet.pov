@@ -52,7 +52,7 @@ lathe{
 #end
 
 //Creation de la guirlande
-#macro guirlande(P0,P1,P2,P3,P4,nb,dimPt,dimCyl,color1)
+#macro guirlande(P0,P1,P2,P3,P4,nb,dimCyl,color1)
     #local M=<0,0,0>;
     #declare tabP=array[nb+1];
     #for(i,0,nb)
@@ -63,7 +63,9 @@ lathe{
     #end
     #for(i,0,nb-1)
         cylinder{
-            tabP[i] tabP[i+1] dimCyl
+            tabP[i] 
+            tabP[i+1] 
+            dimCyl
             pigment {color color1}
         }
     #end
@@ -80,6 +82,17 @@ lathe{
 				            texture {DMFDarkOak scale 0.1}			// texture que le cylindre va prendre
 			        	}
        #while(i< nombreDeCone)
+       	      union {
+				#declare P0 = <0,  rayon*(1-(i+1)/nombreDeCone),   hauteur+(1+i)* ecartHauteur>; //Point du dessus
+                    	#declare P1 = <     3*rayon*(1-i/nombreDeCone), 0, hauteur+(3/4+i)*ecartHauteur>;
+                    	#declare P2 = <0,    -3*rayon*(1-i/nombreDeCone),   hauteur+(1/2+i)*ecartHauteur >;
+                    	#declare P3 = <-3*rayon*(1-i/nombreDeCone),0, hauteur+(1/4+i)* ecartHauteur >;
+                    	#declare P4 = <0,    rayon*(1-i/nombreDeCone), hauteur+ i* ecartHauteur>; 
+	       		#declare nb=100;
+	       		#declare dimCyl=0.05;
+	       		guirlande(P0,P1,P2,P3,P4,nb,dimCyl,Red)
+	       	}
+	       	
 		       difference {
 				   	union {
 							cone{											//creation du cone
@@ -99,7 +112,6 @@ lathe{
 						   	<	((1-(i+1)/nombreDeCone))*cos (2*Pi*j/nombreDeCylindre),      // mesure du cylindre a enlever
 						            ((1-(i+1)/nombreDeCone))*sin(2*Pi*j/nombreDeCylindre),
 			                         	hauteur+(i+1)*ecartHauteur	>
-//			                         	(rayon*(1-i/nombreDeCone))*0.075	
 				                        ((1-(i)/nombreDeCone))/8					//rayon du cylindre a enlever
 		                        }
 		                        #declare j=j+1;
@@ -108,19 +120,6 @@ lathe{
  					pigment{Jade}							// color of leaves
 
 	       	}
-	       	union {
-	       		#declare P0=<0,(rayon*1)*((1-(i-1)/nombreDeCone)),hauteur+(1+i)* ecartHauteur>; //Point du dessus
-        			#declare P1 = <(rayon*3)*((1-(i)/nombreDeCone)), 0,hauteur+i*ecartHauteur+(ecartHauteur/4)>;
-        			#declare P2 = <0,	-(rayon*3)*((1-(i)/nombreDeCone)),	hauteur+i* ecartHauteur +(2* ecartHauteur/4)>;
-        			#declare P3 = <-(rayon*3)*((1-(i)/nombreDeCone)),0,hauteur+i* ecartHauteur +(3* ecartHauteur/4)>;
-        			#declare P4 = <0,	(rayon*1)*((1-(i-1)/nombreDeCone)), hauteur+i* ecartHauteur>; 
-	       		#declare nb=100;
-	       		#declare dimPt=0.05;
-	       		#declare dimCyl=0.05;
-	       		guirlande(P0,P1,P2,P3,P4,nb,dimPt,dimCyl,Red)
-	       	}
-	       	
-		
 			#declare j=0;
 			union {
 				#while(j<nombreDeBoule)						//ajout de nombreDeBoule Boule
@@ -177,11 +176,14 @@ lathe{
              #declare rot=2*Pi/nombreDeBoule/2;
 	       #declare i=i+1;
 	       #end
+	       union {
 	       sphere{										//creation des boules rouges
 			     	<	0, 0, hauteur+nombreDeCone*ecartHauteur >  //position de la boule au sommet
 	     		 		0.5				
-					pigment { Black}
+					pigment {Black}
 	                  }
+
+	       }
 	} 
 	
 }
