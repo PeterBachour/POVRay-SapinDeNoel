@@ -30,11 +30,11 @@ background {White}								  	  // fond d'ecran blanc
 #declare rFicelle = 0.06; 
 
 //ne pas multiplier 
-#macro Bspline5(step,PO,P1,P2,P3,P4,eq)
+#macro Bspline5(step,P0,P1,P2,P3,P4,eq)
 	 #local eq=(pow(1-step,4)*P0+4*step*pow(1-step,3)*P1+4*pow(step,2)*pow(1-step,2)*P2+4*pow(step,3)*(1-step)*P3+pow(step,4)*P4);
 #end
 
-#macro Bspline2(step,PO,P1,P2, eq)
+#macro Bspline2(step,P0,P1,P2, eq)
 	 #local eq=(pow((1-step),2)*P0+2*(1-step)*step*P1+step*step*P2);
 #end
 
@@ -52,25 +52,19 @@ lathe{
 #end
 
 //Creation de la guirlande
-#macro guirlande(PO,P1,P2,P3,P4,nb,dimPt,dimCyl,coulPt,coulcyl)
+#macro guirlande(P0,P1,P2,P3,P4,nb,dimPt,dimCyl,color1)
     #local M=<0,0,0>;
     #declare tabP=array[nb+1];
     #for(i,0,nb)
         #declare t0=i/nb;
         #declare M=<0,0,0>;
-        paraBez(t0,P0,P1,P2,P3,P4,M)
+        Bspline5(t0,P0,P1,P2,P3,P4,M)
         #declare tabP[i]=M;
     #end
     #for(i,0,nb-1)
-        #if (i>0)
-            sphere{
-                tabP[i] dimPt
-                pigment {color coulPt}
-            }
-        #end //fin if
         cylinder{
             tabP[i] tabP[i+1] dimCyl
-            pigment {color coulcyl}
+            pigment {color color1}
         }
     #end
 #end
@@ -79,7 +73,6 @@ lathe{
 
 #declare sapin=object{									// creation du sapin
 	union{         
-
 				  cylinder{											// creation du cylindre qui est la base du tronc
 				            <0,0,-1>									// position du cylindre
 				            <0,0,hauteur>								// mesure du cylindre
@@ -115,6 +108,18 @@ lathe{
  					pigment{Jade}							// color of leaves
 
 	       	}
+	       	union {
+	       		#declare P0=<0,(rayon*1)*((1-(i-1)/nombreDeCone)),hauteur+(1+i)* ecartHauteur>; //Point du dessus
+        			#declare P1 = <(rayon*3)*((1-(i)/nombreDeCone)), 0,hauteur+i*ecartHauteur+(ecartHauteur/4)>;
+        			#declare P2 = <0,	-(rayon*3)*((1-(i)/nombreDeCone)),	hauteur+i* ecartHauteur +(2* ecartHauteur/4)>;
+        			#declare P3 = <-(rayon*3)*((1-(i)/nombreDeCone)),0,hauteur+i* ecartHauteur +(3* ecartHauteur/4)>;
+        			#declare P4 = <0,	(rayon*1)*((1-(i-1)/nombreDeCone)), hauteur+i* ecartHauteur>; 
+	       		#declare nb=100;
+	       		#declare dimPt=0.05;
+	       		#declare dimCyl=0.05;
+	       		guirlande(P0,P1,P2,P3,P4,nb,dimPt,dimCyl,Red)
+	       	}
+	       	
 		
 			#declare j=0;
 			union {
@@ -165,7 +170,7 @@ lathe{
 
 					}
 	                  #declare j=j+1;
-                  #end
+	               #end
 			}
              #declare nombreDeBoule = nombreDeBoule-5;
              #declare nombreDeCylindre=nombreDeBoule;
