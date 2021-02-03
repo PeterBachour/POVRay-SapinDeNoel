@@ -23,7 +23,7 @@ background {White}								  	  // fond d'ecran blanc
 #declare nombreDeCone=6; 
 #declare i=0;
 #declare Pi=3.1415;
-#declare rayonDeBoule=0.3;
+#declare rayonDeBoule=0.05;
 #declare nombreDeBoule=30;
 #declare nombreDeCylindre=nombreDeBoule;
 #declare rot=2*Pi/nombreDeBoule/2;
@@ -51,6 +51,30 @@ lathe{
 }
 #end
 
+//Creation de la guirlande
+#macro guirlande(PO,P1,P2,P3,P4,nb,dimPt,dimCyl,coulPt,coulcyl)
+    #local M=<0,0,0>;
+    #declare tabP=array[nb+1];
+    #for(i,0,nb)
+        #declare t0=i/nb;
+        #declare M=<0,0,0>;
+        paraBez(t0,P0,P1,P2,P3,P4,M)
+        #declare tabP[i]=M;
+    #end
+    #for(i,0,nb-1)
+        #if (i>0)
+            sphere{
+                tabP[i] dimPt
+                pigment {color coulPt}
+            }
+        #end //fin if
+        cylinder{
+            tabP[i] tabP[i+1] dimCyl
+            pigment {color coulcyl}
+        }
+    #end
+#end
+
 
 
 #declare sapin=object{									// creation du sapin
@@ -71,7 +95,6 @@ lathe{
 							<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
 							1-(1+i)/nombreDeCone				// cap point radius 
 					   }
-
 					}
 					#declare j=0;
 					union {
@@ -83,12 +106,13 @@ lathe{
 						   	<	((1-(i+1)/nombreDeCone))*cos (2*Pi*j/nombreDeCylindre),      // mesure du cylindre a enlever
 						            ((1-(i+1)/nombreDeCone))*sin(2*Pi*j/nombreDeCylindre),
 			                         	hauteur+(i+1)*ecartHauteur	>
+//			                         	(rayon*(1-i/nombreDeCone))*0.075	
 				                        ((1-(i)/nombreDeCone))/8					//rayon du cylindre a enlever
 		                        }
 		                        #declare j=j+1;
                   		#end  
 					}
- 							pigment{Jade}							// color of leaves
+ 					pigment{Jade}							// color of leaves
 
 	       	}
 		
@@ -97,63 +121,46 @@ lathe{
 				#while(j<nombreDeBoule)						//ajout de nombreDeBoule Boule
 		     		union {
 					#declare rayonJ = 	 rayon*(1-i/nombreDeCone);	 
+					#declare pointX=rayonJ*cos (2*Pi*j/nombreDeBoule+rot);
+					#declare pointY=rayonJ*sin (2*Pi*j/nombreDeBoule+rot);
+					#declare pointZ=hauteur+i*ecartHauteur ;
+					
 					 union {
-					 sphere{										//creation des boules rouges
-			     		 	<	rayonJ*cos (2*Pi*j/nombreDeBoule+rot),
-			     		 		rayonJ*sin(2*Pi*j/nombreDeBoule+rot),
-			     		 		hauteur+i*ecartHauteur > 
-				     		 	rayonDeBoule/2+rayonDeBoule/(i+1)				
-		                            pigment {Red} finish{diffuse 10}
-	                  		}	
+						 sphere{										//creation des boules rouges
+				     		 		<pointX, pointY, pointZ> 
+					     		 	rayonDeBoule
+				                  	pigment {Red} finish{diffuse 10}
+		                  	}	
 			                  cylinder {
-			                 			 <	rayonJ*cos (2*Pi*j/nombreDeBoule+rot),
-					     		 		rayonJ*sin(2*Pi*j/nombreDeBoule+rot),
-					     		 		hauteur+i*ecartHauteur > 
-		 						<	rayonJ*cos (2*Pi*j/nombreDeBoule+rot),
-					     		 		rayonJ*sin(2*Pi*j/nombreDeBoule+rot),
-					     		 		hauteur+i*ecartHauteur-0.7 >
-										rFicelle
-			                  		pigment {Black}
+			     		 		<pointX, pointY, pointZ> 
+		 					<pointX, pointY, pointZ-0.7> 
+							rFicelle
+			                  	pigment {Black}
 			                 	}
 					 }
+					 #declare latheX=	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot);
+					 #declare latheY=(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot);
+					 #declare latheZ=hauteur+i*ecartHauteur-0.7-0.2;
+
+					 
 					 #if( mod(i,3)=0)
 					 union {
-					 	createLathe(4, <0, -5 >, <3, -2 >, <3, 0 > , <3, 0.5>, rgbt<0,0.4,0.4,0.3>, 
-					 	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
-				     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
-				     		 		hauteur+i*ecartHauteur-0.7-0.2 )
-						createLathe(4, <3, 0.5>, <2, 2 >, <2, 1 >, <rFicelle*10, 2 >, rgbt<0.4,0.4,0,0.3> 
-					 	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
-				     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
-				     		 		hauteur+i*ecartHauteur-0.7-0.2 )
+					 	createLathe(4, <0, -5 >, <3, -2 >, <3, 0 > , <3, 0.5>, rgbt<0,0.4,0.4,0.3>, latheX, latheY, latheZ)
+						createLathe(4, <3, 0.5>, <2, 2 >, <2, 1 >, <rFicelle*10, 2 >, rgbt<0.4,0.4,0,0.3>,  latheX, latheY, latheZ)
 						 }
 					 
 					 #end
 					 #if( mod(i,3)=1)
 					  union {
-					  	createLathe(4, <1, -5 >, <2, -4 >, <2, -3 > , <1, -2>, rgbt<0.4,1,0.4,0.3>, 
-					 	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
-				     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
-				     		 		hauteur+i*ecartHauteur-0.7-0.2 )
-						createLathe(4, <1, -2>, <3, -1 >, <3, 0 >, <rFicelle*10, 2 >, rgbt<0,0.4,1,0.3>
-					 	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
-				     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
-				     		 		hauteur+i*ecartHauteur-0.7-0.2 )
+					  	createLathe(4, <1, -5 >, <2, -4 >, <2, -3 > , <1, -2>, rgbt<0.4,1,0.4,0.3>,  latheX, latheY, latheZ)
+						createLathe(4, <1, -2>, <3, -1 >, <3, 0 >, <rFicelle*10, 2 >, rgbt<0,0.4,1,0.3>,  latheX, latheY, latheZ)
 						 }
 					 
 					 #end
 					  #if( mod(i,3)=2)
 					  union{
-					  	createLathe(4,  <0, -2 >, <1, -1>, <2, 0 >, <3,0>, rgbt<0.3,0,0.6,0.3>, 
-					 	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
-				     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
-				     		 		hauteur+i*ecartHauteur-0.7-0.2 )
-						createLathe(4,  <3, 0 >, <3, 1>, <2, 2 >, <rFicelle*10, 2 >, rgb<0.3,1,0.6,0.3>
-					 	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot),
-				     		 		(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot),
-				     		 		hauteur+i*ecartHauteur-0.7-0.2 )
-						 }
-					  
+					  	createLathe(4,  <0, -2 >, <1, -1>, <2, 0 >, <3,0>, rgbt<0.3,0,0.6,0.3>,  latheX, latheY, latheZ)						createLathe(4,  <3, 0 >, <3, 1>, <2, 2 >, <rFicelle*10, 2 >, rgb<0.3,1,0.6,0.3>,  latheX, latheY, latheZ)
+					  }
 					 #end
 
 					}
@@ -173,5 +180,4 @@ lathe{
 	} 
 	
 }
-
 object{sapin}
