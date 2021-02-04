@@ -4,7 +4,9 @@
 
 
 #declare sca=50;  									// scalaire pour la taille
- 
+
+global_settings { max_trace_level 20 }
+
 camera {
     location <0.2*sca,1*sca,14.5> 					// location of camera
     look_at <0,0,10>								// ou la camera va se fixer 
@@ -31,7 +33,7 @@ background {White}								  	  // fond d'ecran blanc
 #declare rFicelle = 0.06; 
 
 //ne pas multiplier 
-#macro Bspline5(step,P0,P1,P2,P3,P4,eq)
+#macro Bspline4(step,P0,P1,P2,P3,P4,eq)
 	 #local eq=(pow(1-step,4)*P0+4*step*pow(1-step,3)*P1+4*pow(step,2)*pow(1-step,2)*P2+4*pow(step,3)*(1-step)*P3+pow(step,4)*P4);
 #end
 
@@ -59,15 +61,61 @@ lathe{
     #for(i,0,nb)
         #declare t0=i/nb;
         #declare M=<0,0,0>;
-        Bspline5(t0,P0,P1,P2,P3,P4,M)
+        Bspline4(t0,P0,P1,P2,P3,P4,M)
         #declare tabP[i]=M;
     #end
     #for(i,0,nb-1)
+
         cylinder{
             tabP[i] 
             tabP[i+1] 
             dimCyl
             pigment {color color1}
+        }
+    #end
+#end
+
+
+//Creation de la guirlande Electrique
+#macro guirlandeElectrique(P0,P1,P2,nb,dimCyl,color1)
+    #local M=<0,0,0>;
+    #declare tabP=array[nb+1];
+    #for(i,0,nb)
+        #declare t0=i/nb;
+        #declare M=<0,0,0>;
+        Bspline2(t0,P0,P1,P2,M)
+        #declare tabP[i]=M;
+    #end
+    #for(i,0,nb-1)
+
+        cylinder{
+            tabP[i] 
+            tabP[i+1] 
+            dimCyl
+            pigment {color color1}
+        }
+    #end
+#end
+
+#macro spirale(height,rCyl,nbTours,nb)
+    #declare tabP=array[nb+1];
+    #for(i,1,nb)
+		#declare paramZ=(i/nb) * nombreDeCone*ecartHauteur+hauteur ;
+		#if(i = 0)
+			#declare coeff= (height-paramZ) * rCyl;
+		#else
+			#declare coeff=(height-paramZ)/paramZ * rCyl;
+		#end
+		#declare paramX=coeff*cos(nbTours*paramZ);
+		#declare paramY=coeff*sin(nbTours*paramZ);
+        #declare tabP[i]=<paramX,paramY,paramZ>;
+    #end
+    #for(i,1,nb-2)
+        cylinder{
+            tabP[i] 
+            tabP[i+1] 
+            dimCyl
+            pigment {Red}
         }
     #end
 #end
@@ -85,14 +133,32 @@ lathe{
        #while(i< nombreDeCone)
        	      union {
 				#declare P0 = <0,  rayon*(1-(i+1)/nombreDeCone),   hauteur+(1+i)* ecartHauteur>; //Point du dessus
-                    	#declare P1 = <     3*rayon*(1-i/nombreDeCone), 0, hauteur+(3/4+i)*ecartHauteur>;
-                    	#declare P2 = <0,    -3*rayon*(1-i/nombreDeCone),   hauteur+(1/2+i)*ecartHauteur >;
-                    	#declare P3 = <-3*rayon*(1-i/nombreDeCone),0, hauteur+(1/4+i)* ecartHauteur >;
+                    	#declare P1 = <     3*rayon*(1-i/nombreDeCone), 0, hauteur+(i+1/4)*ecartHauteur>;
+                    	#declare P2 = <0,    -5*rayon*(1-i/nombreDeCone),   hauteur+(i+1/2)*ecartHauteur >;
+                    	#declare P3 = <-3*rayon*(1-i/nombreDeCone),0, hauteur+(i+3/4)* ecartHauteur >;
                     	#declare P4 = <0,    rayon*(1-i/nombreDeCone), hauteur+ i* ecartHauteur>; 
 	       		#declare nb=100;
 	       		#declare dimCyl=0.05;
-	       		guirlande(P0,P1,P2,P3,P4,nb,dimCyl,Red)
+
+				guirlande(P0,P1,P2,P3,P4,nb,dimCyl,Red)
+
+
+
 	       	}
+			   union {
+				   #declare P0 = <rayon*(1-(i+1)/nombreDeCone), 0 ,   hauteur+(1+i)* ecartHauteur>; //Point du dessus
+                    	#declare P1 = <      0,3*rayon*(1-i/nombreDeCone), hauteur+(i+1/4)*ecartHauteur>;
+                    	#declare P2 = <    rayon*(1-i/nombreDeCone), 0,  hauteur+(i+1/2)*ecartHauteur >;
+                    	#declare P3 = <0,-3*rayon*(1-i/nombreDeCone), hauteur+(i+3/4)* ecartHauteur >;
+                    	#declare P4 = <    rayon*(1-i/nombreDeCone),0, hauteur+ i* ecartHauteur>; 
+	       		#declare nb=100;
+	       		#declare dimCyl=0.05;
+				guirlandeElectrique(P0,P1,P2,nb,dimCyl,Yellow)
+				guirlandeElectrique(P2,P3,P4,nb,dimCyl,Yellow)
+			   }
+			   	union {
+					spirale(30,6,1,100)
+			   	}
 	       	
 		       difference {
 				   	union {
@@ -164,7 +230,8 @@ lathe{
 					 #end
 					  #if( mod(i,3)=2)
 					  union{
-					  	createLathe(4,  <0, -2 >, <1, -1>, <2, 0 >, <3,0>, rgbt<0.3,0,0.6,0.3>,  latheX, latheY, latheZ)						createLathe(4,  <3, 0 >, <3, 1>, <2, 2 >, <rFicelle*10, 2 >, rgb<0.3,1,0.6,0.3>,  latheX, latheY, latheZ)
+					  	createLathe(4,  <0, -2 >, <1, -1>, <2, 0 >, <3,0>, rgbt<0.3,0,0.6,0.3>,  latheX, latheY, latheZ)
+						createLathe(4,  <3, 0 >, <3, 1>, <2, 2 >, <rFicelle*10, 2 >, rgb<0.3,1,0.6,0.3>,  latheX, latheY, latheZ)
 					  }
 					 #end
 
