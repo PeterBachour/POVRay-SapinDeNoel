@@ -10,6 +10,7 @@ camera {
     look_at <0,0,10>								// ou la camera va se fixer 
     sky <0,0,1> 									// pour avoir le Z en haut
     right <-image_width/image_height,0,0>	 	    // pour un repere direct
+    rotate<0,0, -360*(clock+0.10)>
 }
 
 light_source { <0.4*sca,1*sca,14.5> White }		    // light source
