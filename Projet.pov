@@ -5,7 +5,7 @@
 
 #declare sca=50;  									// scalaire pour la taille
 
-global_settings { max_trace_level 20 }
+//global_settings { max_trace_level 20 }
 
 camera {
     location <0.2*sca,1*sca,14.5> 					// location of camera
@@ -34,7 +34,7 @@ background {White}								  	  // fond d'ecran blanc
 
 //ne pas multiplier 
 #macro Bspline4(step,P0,P1,P2,P3,P4,eq)
-	 #local eq=(pow(1-step,4)*P0+4*step*pow(1-step,3)*P1+4*pow(step,2)*pow(1-step,2)*P2+4*pow(step,3)*(1-step)*P3+pow(step,4)*P4);
+	 #local eq=(pow((1-step),4)*P0+4*step*pow((1-step),3)*P1+6*pow(step,2)*pow((1-step),2)*P2+4*pow(step,3)*(1-step)*P3+pow(step,4)*P4);
 #end
 
 #macro Bspline2(step,P0,P1,P2, eq)
@@ -57,12 +57,12 @@ lathe{
 //Creation de la guirlande
 #macro guirlande(P0,P1,P2,P3,P4,nb,dimCyl,color1)
     #local M=<0,0,0>;
-    #declare tabP=array[nb+1];
+    #local tabP=array[nb+1];
     #for(i,0,nb)
-        #declare t0=i/nb;
-        #declare M=<0,0,0>;
+        #local t0=i/nb;
+        #local M=<0,0,0>;
         Bspline4(t0,P0,P1,P2,P3,P4,M)
-        #declare tabP[i]=M;
+        #local tabP[i]=M;
     #end
     #for(i,0,nb-1)
 
@@ -79,12 +79,12 @@ lathe{
 //Creation de la guirlande Electrique
 #macro guirlandeElectrique(P0,P1,P2,nb,dimCyl,color1)
     #local M=<0,0,0>;
-    #declare tabP=array[nb+1];
+    #local tabP=array[nb+1];
     #for(i,0,nb)
-        #declare t0=i/nb;
-        #declare M=<0,0,0>;
+        #local t0=i/nb;
+        #local M=<0,0,0>;
         Bspline2(t0,P0,P1,P2,M)
-        #declare tabP[i]=M;
+        #local tabP[i]=M;
     #end
     #for(i,0,nb-1)
 
@@ -97,26 +97,22 @@ lathe{
     #end
 #end
 
-#macro spirale(height,rCyl,nbTours,nb)
-    #declare tabP=array[nb+1];
-    #for(i,1,nb)
-		#declare paramZ=(i/nb) * nombreDeCone*ecartHauteur+hauteur ;
-		#if(i = 0)
-			#declare coeff= (height-paramZ) * rCyl;
-		#else
-			#declare coeff=(height-paramZ)/paramZ * rCyl;
-		#end
-		#declare paramX=coeff*cos(nbTours*paramZ);
-		#declare paramY=coeff*sin(nbTours*paramZ);
+#macro spirale(pente,hauteurspirale,hauteuroffset,nbTours,nbPoints,dimCyl,Ccouleur,pointFinal)
+    #local tabP=array[nbPoints+1];
+
+    #for(i,0,nbPoints)
+		#declare paramZ=(((i)/nbPoints) * hauteurspirale) +hauteuroffset ;
+		#declare coeff= (hauteurspirale+hauteuroffset-paramZ)*pente  ;
+		#declare paramX=coeff*cos((nbTours*paramZ)/Pi);
+		#declare paramY=coeff*sin((nbTours*paramZ)/Pi);
         #declare tabP[i]=<paramX,paramY,paramZ>;
     #end
-    #for(i,1,nb-2)
-        cylinder{
-            tabP[i] 
-            tabP[i+1] 
-            dimCyl
-            pigment {Red}
-        }
+	#local pointFinal = tabP[nbPoints];
+	guirlande(pointFinal,tabP[0],tabP[1],tabP[2],tabP[3],nbPoints,dimCyl,Ccouleur)
+	#local i = 4;
+    #while(i<=nbPoints-3)
+		guirlande(tabP[i-1],tabP[i],tabP[i+1],tabP[i+2],tabP[i+3],nbPoints,dimCyl,Ccouleur)
+		#local i = i+4;
     #end
 #end
 
@@ -140,7 +136,7 @@ lathe{
 	       		#declare nb=100;
 	       		#declare dimCyl=0.05;
 
-				guirlande(P0,P1,P2,P3,P4,nb,dimCyl,Red)
+				//guirlande(P0,P1,P2,P3,P4,nb,dimCyl,Red)
 
 
 
@@ -153,11 +149,13 @@ lathe{
                     	#declare P4 = <    rayon*(1-i/nombreDeCone),0, hauteur+ i* ecartHauteur>; 
 	       		#declare nb=100;
 	       		#declare dimCyl=0.05;
-				guirlandeElectrique(P0,P1,P2,nb,dimCyl,Yellow)
-				guirlandeElectrique(P2,P3,P4,nb,dimCyl,Yellow)
+				//guirlandeElectrique(P0,P1,P2,nb,dimCyl,Yellow)
+				//guirlandeElectrique(P2,P3,P4,nb,dimCyl,Yellow)
 			   }
 			   	union {
-					spirale(30,6,1,100)
+					#local hauteurspirale = (nombreDeCone*ecartHauteur);
+					#local endpoint = <0,0,(nombreDeCone*ecartHauteur)+hauteur>;
+					spirale(0.5,hauteurspirale,hauteur,3,100,dimCyl,Red,endpoint)
 			   	}
 	       	
 		       difference {
