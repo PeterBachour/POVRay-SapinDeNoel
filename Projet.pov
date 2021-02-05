@@ -102,26 +102,52 @@ lathe{
 	#local i = 0;
     #while(i<nbPoints+1)
 		#declare paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
-		#declare coeff= (hauteurspirale+hauteuroffset-paramZ)*pente  ;
-		#declare paramX=coeff*cos(degrees(nbTours*paramZ));
-		#declare paramY=coeff*sin(degrees(nbTours*paramZ));
-        #declare tabP[i]=<paramX,paramY,paramZ>;
-        sphere {
-			tabP[i], 0.3 // <x, y, z>, radius
-			
-		}
-             
+		#declare coeff= ((hauteurspirale+hauteuroffset)-paramZ)*pente  ;
+		#declare paramX=coeff*cos(nbTours*paramZ);
+		#declare paramY=coeff*sin(nbTours*paramZ);
+        #declare tabP[i]=<paramX,paramY,paramZ>;    
 		#local i = i+1;
     #end
-	
-	
 	#local pointFinal = tabP[nbPoints];	
 	#local i = 1;
     #while(i<nbPoints-4)
 		guirlande(tabP[i-1],tabP[i],tabP[i+1],tabP[i+2],tabP[i+3],nbPointsGuirlande,dimCyl,Ccouleur)
 		#local i = i+4;
     #end
-	guirlande(tabP[nbPoints-4],tabP[nbPoints-3],tabP[nbPoints-2],tabP[nbPoints-1],pointFinal,nbPointsGuirlande,dimCyl,Ccouleur)
+		guirlande(tabP[nbPoints-4],tabP[nbPoints-3],tabP[nbPoints-2],tabP[nbPoints-1],pointFinal,nbPointsGuirlande,dimCyl,Ccouleur)
+#end
+
+#macro spiraleElectrique(pente,hauteurspirale,hauteuroffset,nbTours,nbPoints,nbPointsGuirlande,dimCyl,Ccouleur,CHigh,CLow,pointFinal)
+    #local tabP=array[nbPoints+1];
+	#local i = 0;
+    #while(i<nbPoints+1)
+		#declare paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
+		#declare coeff= ((hauteurspirale+hauteuroffset)-paramZ)*pente  ;
+		#declare paramX=coeff*sin(nbTours*paramZ);
+		#declare paramY=coeff*cos(nbTours*paramZ);
+        #declare tabP[i]=<paramX,paramY,paramZ>;    
+		#local i = i+1;
+    #end
+	#local pointFinal = tabP[nbPoints];	
+	#local i = 1;
+    #while(i<nbPoints-2)
+		guirlandeElectrique(tabP[i-1],tabP[i],tabP[i+1],nbPointsGuirlande,dimCyl,Ccouleur)
+		#if ( mod(clock*360, 2) < 0.5 )
+      #local color1 = CHigh;
+    	#else
+       #local color1 = CLow;
+		#end
+		sphere {
+			tabP[i], 0.15 // <x, y, z>, radius
+			pigment { 
+				color1
+			}
+			
+		}
+		#local i = i+2;
+
+    #end
+		guirlandeElectrique(tabP[nbPoints-2],tabP[nbPoints-1],pointFinal,nbPointsGuirlande,dimCyl,Ccouleur)
 #end
 
 #declare endpoint = <0,0,ecartHauteur+hauteur>; 
@@ -129,7 +155,7 @@ lathe{
 #declare sapin=object{									// creation du sapin
 	union{         
 				  cylinder{											// creation du cylindre qui est la base du tronc
-				            <0,0,-1>									// position du cylindre
+				            <0,0,0>									// position du cylindre
 				            <0,0,hauteur>								// mesure du cylindre
 				            1											// rayon du cylindre
 				            texture {DMFDarkOak scale 0.1}			// texture que le cylindre va prendre
@@ -142,12 +168,24 @@ lathe{
 					#local pointDepart = <0,0,hauteur+ecartHauteur*(i)>;
 					#local dimcyl = 0.12;
 					#local pente = ((rayon*(1-i/nombreDeCone))/ecartHauteur)  ;
+
+					spirale(pente,hauteurspirale,hauteurtmp,6,100*(nombreDeCone-i),4,dimcyl,Red,endpoint)
 					#local P1 = < (endpoint.x - pointDepart.x)*1/4,(endpoint.y - pointDepart.y)*1/4,hauteur+ecartHauteur*(i)>;
 					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
 					#local P3 = < (endpoint.x - pointDepart.x)*3/4,(endpoint.y - pointDepart.y)*3/4,hauteur+ecartHauteur*(i)>;
-					spirale(pente,hauteurspirale,hauteurtmp,10,203,100,dimcyl,Red,endpoint)
-				
-					guirlande(pointDepart,P1,P2,P3,endpoint,100,dimcyl,Red)
+					guirlande(pointDepart,P1,P2,P3,endpoint,4,dimcyl,Red)
+
+			   	}
+				   	union {
+					#local hauteurspirale = ecartHauteur;
+					#local hauteurtmp = hauteur+ecartHauteur*(i);
+					#local pointDepart = <0,0,hauteur+ecartHauteur*(i)>;
+					#local dimcyl = 0.12;
+					#local pente = ((rayon*(1-i/nombreDeCone))/ecartHauteur)  ;
+
+					spiraleElectrique(pente,hauteurspirale,hauteurtmp,3,100-(i*12),4,dimcyl,Yellow,Green,Magenta,endpoint)
+					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
+					guirlandeElectrique(pointDepart,P2,endpoint,4,dimcyl,Yellow)
 
 			   	}
 	       	
@@ -157,7 +195,7 @@ lathe{
 							<0,0,hauteur+ecartHauteur*i> 		// location of base point
 							rayon*(1-i/nombreDeCone)			// base point radius
 							<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
-							1-(1+i)/nombreDeCone				// cap point radius 
+							0				// cap point radius 
 					   }
 					
 					#declare j=0;
@@ -175,7 +213,7 @@ lathe{
 		                        #declare j=j+1;
                   		#end  
 					}
- 					pigment{Jade}							// color of leaves
+ 					pigment{Jade}						// color of leaves
 
 
 	       	}
