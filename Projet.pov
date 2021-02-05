@@ -70,7 +70,7 @@ lathe{
             tabP[i] 
             tabP[i+1] 
             dimCyl
-            pigment {color color1}
+            pigment {color1}
         }
     #end
 #end
@@ -97,26 +97,34 @@ lathe{
     #end
 #end
 
-#macro spirale(pente,hauteurspirale,hauteuroffset,nbTours,nbPoints,dimCyl,Ccouleur,pointFinal)
+#macro spirale(pente,hauteurspirale,hauteuroffset,nbTours,nbPoints,nbPointsGuirlande,dimCyl,Ccouleur,pointFinal)
     #local tabP=array[nbPoints+1];
-
-    #for(i,0,nbPoints)
-		#declare paramZ=(((i)/nbPoints) * hauteurspirale) +hauteuroffset ;
+	#local i = 0;
+    #while(i<nbPoints+1)
+		#declare paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
 		#declare coeff= (hauteurspirale+hauteuroffset-paramZ)*pente  ;
-		#declare paramX=coeff*cos((nbTours*paramZ)/Pi);
-		#declare paramY=coeff*sin((nbTours*paramZ)/Pi);
+		#declare paramX=coeff*cos(degrees(nbTours*paramZ));
+		#declare paramY=coeff*sin(degrees(nbTours*paramZ));
         #declare tabP[i]=<paramX,paramY,paramZ>;
+        sphere {
+			tabP[i], 0.3 // <x, y, z>, radius
+			
+		}
+             
+		#local i = i+1;
     #end
-	#local pointFinal = tabP[nbPoints];
-	guirlande(pointFinal,tabP[0],tabP[1],tabP[2],tabP[3],nbPoints,dimCyl,Ccouleur)
-	#local i = 4;
-    #while(i<=nbPoints-3)
-		guirlande(tabP[i-1],tabP[i],tabP[i+1],tabP[i+2],tabP[i+3],nbPoints,dimCyl,Ccouleur)
+	
+	
+	#local pointFinal = tabP[nbPoints];	
+	#local i = 1;
+    #while(i<nbPoints-4)
+		guirlande(tabP[i-1],tabP[i],tabP[i+1],tabP[i+2],tabP[i+3],nbPointsGuirlande,dimCyl,Ccouleur)
 		#local i = i+4;
     #end
+	guirlande(tabP[nbPoints-4],tabP[nbPoints-3],tabP[nbPoints-2],tabP[nbPoints-1],pointFinal,nbPointsGuirlande,dimCyl,Ccouleur)
 #end
 
-
+#declare endpoint = <0,0,ecartHauteur+hauteur>; 
 
 #declare sapin=object{									// creation du sapin
 	union{         
@@ -127,46 +135,31 @@ lathe{
 				            texture {DMFDarkOak scale 0.1}			// texture que le cylindre va prendre
 			        	}
        #while(i< nombreDeCone)
-       	      union {
-				#declare P0 = <0,  rayon*(1-(i+1)/nombreDeCone),   hauteur+(1+i)* ecartHauteur>; //Point du dessus
-                    	#declare P1 = <     3*rayon*(1-i/nombreDeCone), 0, hauteur+(i+1/4)*ecartHauteur>;
-                    	#declare P2 = <0,    -5*rayon*(1-i/nombreDeCone),   hauteur+(i+1/2)*ecartHauteur >;
-                    	#declare P3 = <-3*rayon*(1-i/nombreDeCone),0, hauteur+(i+3/4)* ecartHauteur >;
-                    	#declare P4 = <0,    rayon*(1-i/nombreDeCone), hauteur+ i* ecartHauteur>; 
-	       		#declare nb=100;
-	       		#declare dimCyl=0.05;
 
-				//guirlande(P0,P1,P2,P3,P4,nb,dimCyl,Red)
-
-
-
-	       	}
-			   union {
-				   #declare P0 = <rayon*(1-(i+1)/nombreDeCone), 0 ,   hauteur+(1+i)* ecartHauteur>; //Point du dessus
-                    	#declare P1 = <      0,3*rayon*(1-i/nombreDeCone), hauteur+(i+1/4)*ecartHauteur>;
-                    	#declare P2 = <    rayon*(1-i/nombreDeCone), 0,  hauteur+(i+1/2)*ecartHauteur >;
-                    	#declare P3 = <0,-3*rayon*(1-i/nombreDeCone), hauteur+(i+3/4)* ecartHauteur >;
-                    	#declare P4 = <    rayon*(1-i/nombreDeCone),0, hauteur+ i* ecartHauteur>; 
-	       		#declare nb=100;
-	       		#declare dimCyl=0.05;
-				//guirlandeElectrique(P0,P1,P2,nb,dimCyl,Yellow)
-				//guirlandeElectrique(P2,P3,P4,nb,dimCyl,Yellow)
-			   }
 			   	union {
-					#local hauteurspirale = (nombreDeCone*ecartHauteur);
-					#local endpoint = <0,0,(nombreDeCone*ecartHauteur)+hauteur>;
-					spirale(0.5,hauteurspirale,hauteur,3,100,dimCyl,Red,endpoint)
+					#local hauteurspirale = ecartHauteur;
+					#local hauteurtmp = hauteur+ecartHauteur*(i);
+					#local pointDepart = <0,0,hauteur+ecartHauteur*(i)>;
+					#local dimcyl = 0.12;
+					#local pente = ((rayon*(1-i/nombreDeCone))/ecartHauteur)  ;
+					#local P1 = < (endpoint.x - pointDepart.x)*1/4,(endpoint.y - pointDepart.y)*1/4,hauteur+ecartHauteur*(i)>;
+					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
+					#local P3 = < (endpoint.x - pointDepart.x)*3/4,(endpoint.y - pointDepart.y)*3/4,hauteur+ecartHauteur*(i)>;
+					spirale(pente,hauteurspirale,hauteurtmp,10,203,100,dimcyl,Red,endpoint)
+				
+					guirlande(pointDepart,P1,P2,P3,endpoint,100,dimcyl,Red)
+
 			   	}
 	       	
 		       difference {
-				   	union {
-							cone{											//creation du cone
+				   
+						cone{											//creation du cone
 							<0,0,hauteur+ecartHauteur*i> 		// location of base point
 							rayon*(1-i/nombreDeCone)			// base point radius
 							<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
 							1-(1+i)/nombreDeCone				// cap point radius 
 					   }
-					}
+					
 					#declare j=0;
 					union {
 						#while(j<nombreDeCylindre)				//nombre de cylindre a enlever
@@ -184,12 +177,13 @@ lathe{
 					}
  					pigment{Jade}							// color of leaves
 
+
 	       	}
 			#declare j=0;
 			union {
 				#while(j<nombreDeBoule)						//ajout de nombreDeBoule Boule
 		     		union {
-					#declare rayonJ = 	 rayon*(1-i/nombreDeCone);	 
+					#declare rayonJ = rayon*(1-i/nombreDeCone);	 
 					#declare pointX=rayonJ*cos (2*Pi*j/nombreDeBoule+rot);
 					#declare pointY=rayonJ*sin (2*Pi*j/nombreDeBoule+rot);
 					#declare pointZ=hauteur+i*ecartHauteur ;
