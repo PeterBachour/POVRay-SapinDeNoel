@@ -195,7 +195,7 @@ lathe{
 							<0,0,hauteur+ecartHauteur*i> 		// location of base point
 							rayon*(1-i/nombreDeCone)			// base point radius
 							<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
-							0				// cap point radius 
+							0				// cap point radius  // OK ?
 					   }
 					
 					#declare j=0;
