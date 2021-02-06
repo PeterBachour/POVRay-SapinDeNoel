@@ -102,7 +102,7 @@ lathe{
 	#local i = 0;
     #while(i<nbPoints+1)
 		#declare paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
-		#declare coeff= ((hauteurspirale+hauteuroffset)-paramZ)*(pente)  ;
+		#declare coeff= ((hauteurspirale+hauteuroffset+coneOffset)-paramZ)*(pente)  ;
 		#declare paramX=coeff*cos(nbTours*paramZ);
 		#declare paramY=coeff*sin(nbTours*paramZ);
         #declare tabP[i]=<paramX,paramY,paramZ>;    
@@ -122,7 +122,7 @@ lathe{
 	#local i = 0;
     #while(i<nbPoints+1)
 		#declare paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
-		#declare coeff= ((hauteurspirale+hauteuroffset)-paramZ)*(pente) + coneOffset;
+		#declare coeff= ((hauteurspirale+hauteuroffset+coneOffset)-paramZ)*(pente);
 		#declare paramX=coeff*sin(nbTours*paramZ);
 		#declare paramY=coeff*cos(nbTours*paramZ);
         #declare tabP[i]=<paramX,paramY,paramZ>;    
@@ -167,8 +167,9 @@ lathe{
 					#local hauteurtmp = hauteur+ecartHauteur*(i);
 					#local pointDepart = <0,0,hauteur+ecartHauteur*(i)>;
 					#local dimcyl = 0.12;
-					#local pente = ((rayon*(1-i/nombreDeCone))/ecartHauteur) ;
 					#local coneOffset = 1-(1+i)/nombreDeCone;
+					#local pente = ((rayon*(1-i/nombreDeCone))/(ecartHauteur+coneOffset));
+
 
 
 					spirale(pente,hauteurspirale,hauteurtmp,coneOffset,6,100*(nombreDeCone-i),4,dimcyl,Red,endpoint)
@@ -176,6 +177,12 @@ lathe{
 					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
 					#local P3 = < (endpoint.x - pointDepart.x)*3/4,(endpoint.y - pointDepart.y)*3/4,hauteur+ecartHauteur*(i)>;
 					guirlande(pointDepart,P1,P2,P3,endpoint,4,dimcyl,Red)
+					sphere {
+						endpoint, dimcyl // <x, y, z>, radius
+						pigment { 
+							Red
+						}
+					}
 
 			   	}
 				   	union {
@@ -184,11 +191,17 @@ lathe{
 					#local pointDepart = <0,0,hauteur+ecartHauteur*(i)>;
 					#local dimcyl = 0.12;
 					#local coneOffset = 1-(1+i)/nombreDeCone;
-					#local pente = (rayon*(1-i/nombreDeCone))/(ecartHauteur+coneOffset);
+					#local pente = ((rayon*(1-i/nombreDeCone))/(ecartHauteur+coneOffset));
 
 					spiraleElectrique(pente,hauteurspirale,hauteurtmp,coneOffset,3,(14*nombreDeCone)-(i*12),4,dimcyl,Yellow,Green,Magenta,endpoint)
 					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
 					guirlandeElectrique(pointDepart,P2,endpoint,4,dimcyl,Yellow)
+										sphere {
+						endpoint, dimcyl // <x, y, z>, radius
+						pigment { 
+							Yellow
+						}
+					}
 
 			   	}
 	       	
