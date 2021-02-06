@@ -20,17 +20,42 @@ light_source { <-0.4*sca,1*sca,14.5> White }       	// light source
 
 background {White}								  	  // fond d'ecran blanc
 
-#declare hauteur=6;
-#declare rayon=6; 
-#declare ecartHauteur=hauteur/2;
-#declare nombreDeCone=6; 
-#declare i=0;
-#declare Pi=3.1415;
+//Paramètres à modifier
+#declare hauteur=6; //hauteur du tronc
+#declare rayon=6; //rayon de la brase des cones
+#declare ecartHauteur=hauteur/2; // hauteur des cones
+#declare nombreDeCone=6;
 #declare rayonDeBoule=0.05;
 #declare nombreDeBoule=30;
-#declare nombreDeCylindre=nombreDeBoule;
+
+#declare rFicelle = 0.05;
+#declare hFicelle = 0.7;
+#declare cFicelle = rgb<1,0,0>;
+
+#declare cLathe1 = rgbt<0,0.4,0.4,0.3>;
+#declare cLathe2 = rgbt<0.4,1,0.4,0.3>;
+#declare cLathe3 = rgbt<0.3,0,0.6,0.3>;
+
+#declare guirlandeRayon = 0.12;
+#declare guirlandecouleur = rgb<1,0,0>;
+
+#declare guirlandeERayon = 0.12;
+#declare guirlandeEcouleur = rgb<1,1,0>;
+#declare guirlandeEcHigh = rgb<0,0,1>;
+#declare guirlandeEcLow = rgb<0.5,0,0.5>;
+
+#declare guirlandenbTours = 2;
+#declare guirlandeEnbTours = 1;
+
+
+
+//Paramètres à ne pas modifier
+#declare i=0;
+#declare Pi=3.1415;
+#declare endpoint = <0,0,ecartHauteur+hauteur>;
 #declare rot=2*Pi/nombreDeBoule/2;
-#declare rFicelle = 0.06; 
+#declare nombreDeCylindre=nombreDeBoule;
+
 
 //ne pas multiplier 
 #macro Bspline4(step,P0,P1,P2,P3,P4,eq)
@@ -42,10 +67,10 @@ background {White}								  	  // fond d'ecran blanc
 #end
 
 //Creation des lathes
-#macro createLathe(nbPoints, P0, P1, P2, P3, colorr, tX, tY, tZ)
+#macro createLathe( P0, P1, P2, P3, colorr, tX, tY, tZ)
 lathe{
   bezier_spline
-  nbPoints,
+  4,
   P0, P1, P2, P3
   pigment {color colorr}
   rotate <90, 0, 0> // <x°, y°, z°>
@@ -101,11 +126,11 @@ lathe{
     #local tabP=array[nbPoints+1];
 	#local i = 0;
     #while(i<nbPoints+1)
-		#declare paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
-		#declare coeff= ((hauteurspirale+hauteuroffset+coneOffset)-paramZ)*(pente)  ;
-		#declare paramX=coeff*cos(nbTours*paramZ);
-		#declare paramY=coeff*sin(nbTours*paramZ);
-        #declare tabP[i]=<paramX,paramY,paramZ>;    
+		#local paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
+		#local coeff= ((hauteurspirale+hauteuroffset+coneOffset)-paramZ)*(pente)  ;
+		#local paramX=coeff*cos(nbTours*paramZ*Pi);
+		#local paramY=coeff*sin(nbTours*paramZ*Pi);
+        #local tabP[i]=<paramX,paramY,paramZ>;    
 		#local i = i+1;
     #end
 	#local pointFinal = tabP[nbPoints];	
@@ -121,11 +146,11 @@ lathe{
     #local tabP=array[nbPoints+1];
 	#local i = 0;
     #while(i<nbPoints+1)
-		#declare paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
-		#declare coeff= ((hauteurspirale+hauteuroffset+coneOffset)-paramZ)*(pente);
-		#declare paramX=coeff*sin(nbTours*paramZ);
-		#declare paramY=coeff*cos(nbTours*paramZ);
-        #declare tabP[i]=<paramX,paramY,paramZ>;    
+		#local paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
+		#local coeff= ((hauteurspirale+hauteuroffset+coneOffset)-paramZ)*(pente);
+		#local paramX=coeff*sin(nbTours*paramZ*Pi);
+		#local paramY=coeff*cos(nbTours*paramZ*Pi);
+        #local tabP[i]=<paramX,paramY,paramZ>;    
 		#local i = i+1;
     #end
 	#local pointFinal = tabP[nbPoints];	
@@ -150,7 +175,7 @@ lathe{
 		guirlandeElectrique(tabP[nbPoints-2],tabP[nbPoints-1],pointFinal,nbPointsGuirlande,dimCyl,Ccouleur)
 #end
 
-#declare endpoint = <0,0,ecartHauteur+hauteur>; 
+
 
 #declare sapin=object{									// creation du sapin
 	union{         
@@ -161,45 +186,34 @@ lathe{
 				            texture {DMFDarkOak scale 0.1}			// texture que le cylindre va prendre
 			        	}
        #while(i< nombreDeCone)
-
 			   	union {
-					#local hauteurspirale = ecartHauteur;
+	   				#local hauteurspirale = ecartHauteur;
 					#local hauteurtmp = hauteur+ecartHauteur*(i);
 					#local pointDepart = <0,0,hauteur+ecartHauteur*(i)>;
-					#local dimcyl = 0.12;
 					#local coneOffset = 1-(1+i)/nombreDeCone;
 					#local pente = ((rayon*(1-i/nombreDeCone))/(ecartHauteur+coneOffset));
 
-
-
-					spirale(pente,hauteurspirale,hauteurtmp,coneOffset,6,100*(nombreDeCone-i),4,dimcyl,Red,endpoint)
+					//guirlande classique
+					spirale(pente,hauteurspirale,hauteurtmp,coneOffset,guirlandenbTours,100*(nombreDeCone-i),4,guirlandeRayon,guirlandecouleur,endpoint)
 					#local P1 = < (endpoint.x - pointDepart.x)*1/4,(endpoint.y - pointDepart.y)*1/4,hauteur+ecartHauteur*(i)>;
 					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
 					#local P3 = < (endpoint.x - pointDepart.x)*3/4,(endpoint.y - pointDepart.y)*3/4,hauteur+ecartHauteur*(i)>;
-					guirlande(pointDepart,P1,P2,P3,endpoint,4,dimcyl,Red)
+					guirlande(pointDepart,P1,P2,P3,endpoint,4,guirlandeRayon,guirlandecouleur)
 					sphere {
-						endpoint, dimcyl // <x, y, z>, radius
+						endpoint, guirlandeRayon // point, rayon
 						pigment { 
-							Red
+							color guirlandecouleur
 						}
 					}
 
-			   	}
-				   	union {
-					#local hauteurspirale = ecartHauteur;
-					#local hauteurtmp = hauteur+ecartHauteur*(i);
-					#local pointDepart = <0,0,hauteur+ecartHauteur*(i)>;
-					#local dimcyl = 0.12;
-					#local coneOffset = 1-(1+i)/nombreDeCone;
-					#local pente = ((rayon*(1-i/nombreDeCone))/(ecartHauteur+coneOffset));
-
-					spiraleElectrique(pente,hauteurspirale,hauteurtmp,coneOffset,3,(14*nombreDeCone)-(i*12),4,dimcyl,Yellow,Green,Magenta,endpoint)
+					//guirlande Electrique
+					spiraleElectrique(pente,hauteurspirale,hauteurtmp,coneOffset,guirlandeEnbTours,(14*nombreDeCone)-(i*12),4,guirlandeERayon,guirlandeEcouleur,guirlandeEcHigh,guirlandeEcLow,endpoint)
 					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
-					guirlandeElectrique(pointDepart,P2,endpoint,4,dimcyl,Yellow)
-										sphere {
-						endpoint, dimcyl // <x, y, z>, radius
+					guirlandeElectrique(pointDepart,P2,endpoint,4,guirlandeERayon,guirlandeEcouleur)
+					sphere {
+						endpoint, guirlandeERayon // point, rayon
 						pigment { 
-							Yellow
+							guirlandeEcouleur
 						}
 					}
 
@@ -211,10 +225,10 @@ lathe{
 							<0,0,hauteur+ecartHauteur*i> 		// location of base point
 							rayon*(1-i/nombreDeCone)			// base point radius
 							<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
-							1-(1+i)/nombreDeCone				// cap point radius  // OK ?
+							1-(1+i)/nombreDeCone				// cap point radius
 					   }
 					
-					#declare j=0;
+					#local j=0;
 					union {
 						#while(j<nombreDeCylindre)				//nombre de cylindre a enlever
 						cylinder{ 
@@ -226,21 +240,24 @@ lathe{
 			                         	hauteur+(i+1)*ecartHauteur	>
 				                        ((1-(i)/nombreDeCone))/8					//rayon du cylindre a enlever
 		                        }
-		                        #declare j=j+1;
+		                        #local j=j+1;
                   		#end  
 					}
  					pigment{Jade}						// color of leaves
 
 
 	       	}
-			#declare j=0;
+			#local j=0;
 			union {
 				#while(j<nombreDeBoule)						//ajout de nombreDeBoule Boule
 		     		union {
-					#declare rayonJ = rayon*(1-i/nombreDeCone);	 
-					#declare pointX=rayonJ*cos (2*Pi*j/nombreDeBoule+rot);
-					#declare pointY=rayonJ*sin (2*Pi*j/nombreDeBoule+rot);
-					#declare pointZ=hauteur+i*ecartHauteur ;
+					#local rayonJ = rayon*(1-i/nombreDeCone);	 
+					#local pointX=rayonJ*cos (2*Pi*j/nombreDeBoule+rot);
+					#local pointY=rayonJ*sin (2*Pi*j/nombreDeBoule+rot);
+					#local pointZ=hauteur+i*ecartHauteur ;
+					#local latheTranslationX=	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot);
+					#local latheTranslationY=(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot);
+					#local latheTranslationZ=hauteur+i*ecartHauteur-hFicelle-0.2; // 0.2 est lier aux points dans la lathe
 					
 					 union {
 						 sphere{										//creation des boules rouges
@@ -250,34 +267,32 @@ lathe{
 		                  	}	
 			                  cylinder {
 			     		 		<pointX, pointY, pointZ> 
-		 					<pointX, pointY, pointZ-0.7> 
+		 					<pointX, pointY, pointZ-hFicelle> 
 							rFicelle
 			                  	pigment {Black}
 			                 	}
 					 }
-					 #declare latheX=	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot);
-					 #declare latheY=(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot);
-					 #declare latheZ=hauteur+i*ecartHauteur-0.7-0.2;
+
 
 					 
 					 #if( mod(i,3)=0)
 					 union {
-					 	createLathe(4, <0, -5 >, <3, -2 >, <3, 0 > , <3, 0.5>, rgbt<0,0.4,0.4,0.3>, latheX, latheY, latheZ)
-						createLathe(4, <3, 0.5>, <2, 2 >, <2, 1 >, <rFicelle*10, 2 >, rgbt<0.4,0.4,0,0.3>,  latheX, latheY, latheZ)
+					 	createLathe( <0, -5 >, <3, -2 >, <3, 0 > , <3, 0.5>, cLathe1, latheTranslationX, latheTranslationY, latheTranslationZ)
+						createLathe( <3, 0.5>, <2, 2 >, <2, 1 >, <rFicelle*10, 2 >, cLathe1,  latheTranslationX, latheTranslationY, latheTranslationZ)
 						 }
 					 
 					 #end
 					 #if( mod(i,3)=1)
 					  union {
-					  	createLathe(4, <1, -5 >, <2, -4 >, <2, -3 > , <1, -2>, rgbt<0.4,1,0.4,0.3>,  latheX, latheY, latheZ)
-						createLathe(4, <1, -2>, <3, -1 >, <3, 0 >, <rFicelle*10, 2 >, rgbt<0,0.4,1,0.3>,  latheX, latheY, latheZ)
+					  	createLathe( <1, -5 >, <2, -4 >, <2, -3 > , <1, -2>, cLathe2,  latheTranslationX, latheTranslationY, latheTranslationZ)
+						createLathe(<1, -2>, <3, -1 >, <3, 0 >, <rFicelle*10, 2 >, cLathe2,  latheTranslationX, latheTranslationY, latheTranslationZ)
 						 }
 					 
 					 #end
 					  #if( mod(i,3)=2)
 					  union{
-					  	createLathe(4,  <0, -2 >, <1, -1>, <2, 0 >, <3,0>, rgbt<0.3,0,0.6,0.3>,  latheX, latheY, latheZ)
-						createLathe(4,  <3, 0 >, <3, 1>, <2, 2 >, <rFicelle*10, 2 >, rgb<0.3,1,0.6,0.3>,  latheX, latheY, latheZ)
+					  	createLathe(  <0, -2 >, <1, -1>, <2, 0 >, <3,0>,cLathe3,  latheTranslationX, latheTranslationY, latheTranslationZ)
+						createLathe(  <3, 0 >, <3, 1>, <2, 2 >, <rFicelle*10, 2 >, cLathe3,  latheTranslationX, latheTranslationY, latheTranslationZ)
 					  }
 					 #end
 
@@ -285,10 +300,10 @@ lathe{
 	                  #declare j=j+1;
 	               #end
 			}
-             #declare nombreDeBoule = nombreDeBoule-5;
-             #declare nombreDeCylindre=nombreDeBoule;
-             #declare rot=2*Pi/nombreDeBoule/2;
-	       #declare i=i+1;
+             #local nombreDeBoule = nombreDeBoule-5;
+             #local nombreDeCylindre=nombreDeBoule;
+             #local rot=2*Pi/nombreDeBoule/2;
+	       #local i=i+1;
 	       #end
 	       union {
 	       sphere{										//creation des boules rouges
