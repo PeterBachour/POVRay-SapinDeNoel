@@ -97,12 +97,12 @@ lathe{
     #end
 #end
 
-#macro spirale(pente,hauteurspirale,hauteuroffset,nbTours,nbPoints,nbPointsGuirlande,dimCyl,Ccouleur,pointFinal)
+#macro spirale(pente,hauteurspirale,hauteuroffset,coneOffset, nbTours,nbPoints,nbPointsGuirlande,dimCyl,Ccouleur,pointFinal)
     #local tabP=array[nbPoints+1];
 	#local i = 0;
     #while(i<nbPoints+1)
 		#declare paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
-		#declare coeff= ((hauteurspirale+hauteuroffset)-paramZ)*pente  ;
+		#declare coeff= ((hauteurspirale+hauteuroffset)-paramZ)*(pente)  ;
 		#declare paramX=coeff*cos(nbTours*paramZ);
 		#declare paramY=coeff*sin(nbTours*paramZ);
         #declare tabP[i]=<paramX,paramY,paramZ>;    
@@ -117,12 +117,12 @@ lathe{
 		guirlande(tabP[nbPoints-4],tabP[nbPoints-3],tabP[nbPoints-2],tabP[nbPoints-1],pointFinal,nbPointsGuirlande,dimCyl,Ccouleur)
 #end
 
-#macro spiraleElectrique(pente,hauteurspirale,hauteuroffset,nbTours,nbPoints,nbPointsGuirlande,dimCyl,Ccouleur,CHigh,CLow,pointFinal)
+#macro spiraleElectrique(pente,hauteurspirale,hauteuroffset, coneOffset ,nbTours,nbPoints,nbPointsGuirlande,dimCyl,Ccouleur,CHigh,CLow,pointFinal)
     #local tabP=array[nbPoints+1];
 	#local i = 0;
     #while(i<nbPoints+1)
 		#declare paramZ=(hauteuroffset+hauteurspirale) - ((i/nbPoints) * hauteurspirale)  ;
-		#declare coeff= ((hauteurspirale+hauteuroffset)-paramZ)*pente  ;
+		#declare coeff= ((hauteurspirale+hauteuroffset)-paramZ)*(pente) + coneOffset;
 		#declare paramX=coeff*sin(nbTours*paramZ);
 		#declare paramY=coeff*cos(nbTours*paramZ);
         #declare tabP[i]=<paramX,paramY,paramZ>;    
@@ -167,9 +167,11 @@ lathe{
 					#local hauteurtmp = hauteur+ecartHauteur*(i);
 					#local pointDepart = <0,0,hauteur+ecartHauteur*(i)>;
 					#local dimcyl = 0.12;
-					#local pente = ((rayon*(1-i/nombreDeCone))/ecartHauteur)  ;
+					#local pente = ((rayon*(1-i/nombreDeCone))/ecartHauteur) ;
+					#local coneOffset = 1-(1+i)/nombreDeCone;
 
-					spirale(pente,hauteurspirale,hauteurtmp,6,100*(nombreDeCone-i),4,dimcyl,Red,endpoint)
+
+					spirale(pente,hauteurspirale,hauteurtmp,coneOffset,6,100*(nombreDeCone-i),4,dimcyl,Red,endpoint)
 					#local P1 = < (endpoint.x - pointDepart.x)*1/4,(endpoint.y - pointDepart.y)*1/4,hauteur+ecartHauteur*(i)>;
 					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
 					#local P3 = < (endpoint.x - pointDepart.x)*3/4,(endpoint.y - pointDepart.y)*3/4,hauteur+ecartHauteur*(i)>;
@@ -181,9 +183,10 @@ lathe{
 					#local hauteurtmp = hauteur+ecartHauteur*(i);
 					#local pointDepart = <0,0,hauteur+ecartHauteur*(i)>;
 					#local dimcyl = 0.12;
-					#local pente = ((rayon*(1-i/nombreDeCone))/ecartHauteur)  ;
+					#local coneOffset = 1-(1+i)/nombreDeCone;
+					#local pente = (rayon*(1-i/nombreDeCone))/(ecartHauteur+coneOffset);
 
-					spiraleElectrique(pente,hauteurspirale,hauteurtmp,3,100-(i*12),4,dimcyl,Yellow,Green,Magenta,endpoint)
+					spiraleElectrique(pente,hauteurspirale,hauteurtmp,coneOffset,3,(14*nombreDeCone)-(i*12),4,dimcyl,Yellow,Green,Magenta,endpoint)
 					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
 					guirlandeElectrique(pointDepart,P2,endpoint,4,dimcyl,Yellow)
 
@@ -195,7 +198,7 @@ lathe{
 							<0,0,hauteur+ecartHauteur*i> 		// location of base point
 							rayon*(1-i/nombreDeCone)			// base point radius
 							<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
-							0				// cap point radius  // OK ?
+							1-(1+i)/nombreDeCone				// cap point radius  // OK ?
 					   }
 					
 					#declare j=0;
