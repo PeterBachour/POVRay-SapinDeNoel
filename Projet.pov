@@ -26,7 +26,7 @@ background {White}								  	  // fond d'ecran blanc
 #declare hauteur=6; //hauteur du tronc
 #declare rayon=6; //rayon de la brase des cones
 #declare ecartHauteur=hauteur/2; // hauteur des cones
-#declare nombreDeCone=9;
+#declare nombreDeCone=6;
 #declare rayonDeBoule=0.05;
 #declare nombreDeBoule=30;
 
@@ -101,6 +101,7 @@ lathe{
             tabP[i+1] 
             dimCyl
             pigment {color1}
+			finish { metallic 0.3  }
         }
 		#local i = i+1;
     #end
@@ -127,6 +128,7 @@ lathe{
             tabP[i+1] 
             dimCyl
             pigment {color color1}
+
         }
 		#local i = i+1;
     #end
@@ -177,6 +179,7 @@ lathe{
 			pigment { 
 				color1
 			}
+			finish { ambient 100 }
 			
 		}
 		#local i = i+2;
@@ -200,10 +203,14 @@ object{									// creation du sapin
 			        	}
 
 					sphere{										//creation des boules rouges
-			     	<	0, 0, hauteur+nombreDeCone*ecartHauteur >  //position de la boule au sommet
-	     		 		0.5				
-					pigment {Black}
-	                  }
+			     	 <	0, 0, hauteur+nombreDeCone*ecartHauteur >  //position de la boule au sommet
+	     		 	 	0.5				
+					 pigment {	Yellow }
+					 finish { ambient 100 }
+
+					
+	                   }
+
 		}
 		#local i =0;
 		union {
@@ -362,5 +369,27 @@ object{									// creation du sapin
 }
 #end
 
+#macro superBoite()
+object{
+	box {
+		<-1, -1, -1>, <1, 1, 1> // <x, y, z> near lower left corner, <x, y, z> far upper right corner
+		
+		pigment { 
+				image_map {
+							png  //type de fichier graphique, parmi ceux qui sont supportés 
+							"linux"
+							map_type 0    //Type = type de projection, 0,1,2,...
+							interpolate 2 
+					}
+		}
+		scale <2.0, 2.0, 2.0> // <x, y, z>
+		rotate <90, 0, 0> // <x°, y°, z°>
+	}
+}
+#end
+#declare boite1 = superBoite()
+#declare boite2 = superBoite()
 #declare sapin1=sapin()
 object{sapin1}
+object{boite1 scale <1.1,1.0,1.0>}
+object{boite2 rotate <0, 0, 90> scale <1.0,1.1,1.0>} // <x°, y°, z°>
