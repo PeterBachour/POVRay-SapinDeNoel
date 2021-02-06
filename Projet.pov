@@ -26,7 +26,7 @@ background {White}								  	  // fond d'ecran blanc
 #declare hauteur=6; //hauteur du tronc
 #declare rayon=6; //rayon de la brase des cones
 #declare ecartHauteur=hauteur/2; // hauteur des cones
-#declare nombreDeCone=6;
+#declare nombreDeCone=9;
 #declare rayonDeBoule=0.05;
 #declare nombreDeBoule=30;
 
@@ -86,7 +86,7 @@ lathe{
     #local tabP=array[nb+1];
 	
     #local i = 0;
-    #while(i<nb)
+    #while(i<nb+1)
         #local t0=i/nb;
         #local M=<0,0,0>;
         Bspline4(t0,P0,P1,P2,P3,P4,M)
@@ -94,7 +94,7 @@ lathe{
 		#local i = i+1;
     #end
     #local i = 0;
-    #while(i<nb-1)
+    #while(i<nb)
 
         cylinder{
             tabP[i] 
@@ -112,7 +112,7 @@ lathe{
     #local M=<0,0,0>;
     #local tabP=array[nb+1];
     #local i = 0;
-    #while(i<nb)
+    #while(i<nb+1)
         #local t0=i/nb;
         #local M=<0,0,0>;
         Bspline2(t0,P0,P1,P2,M)
@@ -120,7 +120,7 @@ lathe{
 		#local i = i+1;
     #end
     #local i = 0;
-    #while(i<nb-1)
+    #while(i<nb)
 
         cylinder{
             tabP[i] 
@@ -348,7 +348,7 @@ object{									// creation du sapin
 	               #end
 			}
 		}
-             #declare nombreDeBoule = nombreDeBoule-5;
+             #declare nombreDeBoule = ((nombreDeBoule)/(i+1))+5; //div 0
              #declare nombreDeCylindre=nombreDeBoule;
              #declare rot=2*Pi/nombreDeBoule/2;
 	       	#local i=i+1;
