@@ -1,11 +1,13 @@
+#version 3.7;
 #include "shapes.inc"
 #include "colors.inc"
 #include "textures.inc"
 
-
 #declare sca=50;  									// scalaire pour la taille
 
-//global_settings { max_trace_level 20 }
+global_settings { //max_trace_level 20 
+assumed_gamma 1.0
+}
 
 camera {
     location <0.2*sca,1*sca,14.5> 					// location of camera
@@ -50,7 +52,6 @@ background {White}								  	  // fond d'ecran blanc
 
 
 //Paramètres à ne pas modifier
-#declare i=0;
 #declare Pi=3.1415;
 #declare endpoint = <0,0,ecartHauteur+hauteur>;
 #declare rot=2*Pi/nombreDeBoule/2;
@@ -83,13 +84,17 @@ lathe{
 #macro guirlande(P0,P1,P2,P3,P4,nb,dimCyl,color1)
     #local M=<0,0,0>;
     #local tabP=array[nb+1];
-    #for(i,0,nb)
+	
+    #local i = 0;
+    #while(i<nb)
         #local t0=i/nb;
         #local M=<0,0,0>;
         Bspline4(t0,P0,P1,P2,P3,P4,M)
         #local tabP[i]=M;
+		#local i = i+1;
     #end
-    #for(i,0,nb-1)
+    #local i = 0;
+    #while(i<nb-1)
 
         cylinder{
             tabP[i] 
@@ -97,6 +102,7 @@ lathe{
             dimCyl
             pigment {color1}
         }
+		#local i = i+1;
     #end
 #end
 
@@ -105,13 +111,16 @@ lathe{
 #macro guirlandeElectrique(P0,P1,P2,nb,dimCyl,color1)
     #local M=<0,0,0>;
     #local tabP=array[nb+1];
-    #for(i,0,nb)
+    #local i = 0;
+    #while(i<nb)
         #local t0=i/nb;
         #local M=<0,0,0>;
         Bspline2(t0,P0,P1,P2,M)
         #local tabP[i]=M;
+		#local i = i+1;
     #end
-    #for(i,0,nb-1)
+    #local i = 0;
+    #while(i<nb-1)
 
         cylinder{
             tabP[i] 
@@ -119,6 +128,7 @@ lathe{
             dimCyl
             pigment {color color1}
         }
+		#local i = i+1;
     #end
 #end
 
@@ -176,67 +186,103 @@ lathe{
 #end
 
 
-
-#declare sapin=object{									// creation du sapin
+#macro sapin()
+object{									// creation du sapin
 	union{         
+		union {
+			
+		
 				  cylinder{											// creation du cylindre qui est la base du tronc
 				            <0,0,0>									// position du cylindre
 				            <0,0,hauteur>								// mesure du cylindre
 				            1											// rayon du cylindre
 				            texture {DMFDarkOak scale 0.1}			// texture que le cylindre va prendre
 			        	}
+
+					sphere{										//creation des boules rouges
+			     	<	0, 0, hauteur+nombreDeCone*ecartHauteur >  //position de la boule au sommet
+	     		 		0.5				
+					pigment {Black}
+	                  }
+		}
+		#local i =0;
+		union {
+			
+		
        #while(i< nombreDeCone)
-			   	union {
+	   			    #local rayonConeBase = (rayon*(1-i/nombreDeCone));
+					#local rayonConePointe = 1-(1+i)/nombreDeCone;
+			   	
 	   				#local hauteurspirale = ecartHauteur;
 					#local hauteurtmp = hauteur+ecartHauteur*(i);
 					#local pointDepart = <0,0,hauteur+ecartHauteur*(i)>;
-					#local coneOffset = 1-(1+i)/nombreDeCone;
-					#local pente = ((rayon*(1-i/nombreDeCone))/(ecartHauteur+coneOffset));
+					#local pente = (rayonConeBase)/(ecartHauteur+rayonConePointe);
 
-					//guirlande classique
-					spirale(pente,hauteurspirale,hauteurtmp,coneOffset,guirlandenbTours,100*(nombreDeCone-i),4,guirlandeRayon,guirlandecouleur,endpoint)
-					#local P1 = < (endpoint.x - pointDepart.x)*1/4,(endpoint.y - pointDepart.y)*1/4,hauteur+ecartHauteur*(i)>;
-					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
-					#local P3 = < (endpoint.x - pointDepart.x)*3/4,(endpoint.y - pointDepart.y)*3/4,hauteur+ecartHauteur*(i)>;
-					guirlande(pointDepart,P1,P2,P3,endpoint,4,guirlandeRayon,guirlandecouleur)
-					sphere {
-						endpoint, guirlandeRayon // point, rayon
-						pigment { 
-							color guirlandecouleur
+		union {
+			
+		
+			union {
+				
+			
+				union {
+
+					union {
+						union {
+							//guirlande classique
+							spirale(pente,hauteurspirale,hauteurtmp,rayonConePointe,guirlandenbTours,(100*(nombreDeCone-i))*guirlandenbTours,4,guirlandeRayon,guirlandecouleur,endpoint)
+							#local P1 = < (endpoint.x - pointDepart.x)*1/4,(endpoint.y - pointDepart.y)*1/4,hauteur+ecartHauteur*(i)>;
+							#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
+							#local P3 = < (endpoint.x - pointDepart.x)*3/4,(endpoint.y - pointDepart.y)*3/4,hauteur+ecartHauteur*(i)>;
+							guirlande(pointDepart,P1,P2,P3,endpoint,4,guirlandeRayon,guirlandecouleur)
+						}
+						sphere {
+							endpoint, guirlandeRayon // point, rayon
+							pigment { 
+								color guirlandecouleur
+							}
 						}
 					}
 
-					//guirlande Electrique
-					spiraleElectrique(pente,hauteurspirale,hauteurtmp,coneOffset,guirlandeEnbTours,(14*nombreDeCone)-(i*12),4,guirlandeERayon,guirlandeEcouleur,guirlandeEcHigh,guirlandeEcLow,endpoint)
-					#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
-					guirlandeElectrique(pointDepart,P2,endpoint,4,guirlandeERayon,guirlandeEcouleur)
-					sphere {
-						endpoint, guirlandeERayon // point, rayon
-						pigment { 
-							guirlandeEcouleur
+
+					union {
+						
+					
+						union {
+							//guirlande Electrique
+							spiraleElectrique(pente,hauteurspirale,hauteurtmp,rayonConePointe,guirlandeEnbTours,(14*nombreDeCone)-(i*12),4,guirlandeERayon,guirlandeEcouleur,guirlandeEcHigh,guirlandeEcLow,endpoint)
+							#local P2 = < (endpoint.x - pointDepart.x)*1/2,(endpoint.y - pointDepart.y)*1/2,hauteur+ecartHauteur*(i)>;
+							guirlandeElectrique(pointDepart,P2,endpoint,4,guirlandeERayon,guirlandeEcouleur)
+						}
+
+						sphere {
+							endpoint, guirlandeERayon // point, rayon
+							pigment { 
+								guirlandeEcouleur
+							}
 						}
 					}
+				}
 
-			   	}
+			   	
 	       	
 		       difference {
 				   
 						cone{											//creation du cone
 							<0,0,hauteur+ecartHauteur*i> 		// location of base point
-							rayon*(1-i/nombreDeCone)			// base point radius
+							rayonConeBase			// base point radius
 							<0,0,hauteur+ecartHauteur*(i+1)> 	// location of cap point
-							1-(1+i)/nombreDeCone				// cap point radius
+							rayonConePointe				// cap point radius
 					   }
 					
 					#local j=0;
 					union {
 						#while(j<nombreDeCylindre)				//nombre de cylindre a enlever
 						cylinder{ 
-							<	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeCylindre),  //position du cylindre a enlever
-								(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeCylindre),
+							<	(rayonConeBase)*cos (2*Pi*j/nombreDeCylindre),  //position du cylindre a enlever
+								(rayonConeBase)*sin(2*Pi*j/nombreDeCylindre),
 								hauteur+i*ecartHauteur	>
-						   	<	((1-(i+1)/nombreDeCone))*cos (2*Pi*j/nombreDeCylindre),      // mesure du cylindre a enlever
-						            ((1-(i+1)/nombreDeCone))*sin(2*Pi*j/nombreDeCylindre),
+						   	<	(rayonConePointe)*cos (2*Pi*j/nombreDeCylindre),      // mesure du cylindre a enlever
+						            (rayonConePointe)*sin(2*Pi*j/nombreDeCylindre),
 			                         	hauteur+(i+1)*ecartHauteur	>
 				                        ((1-(i)/nombreDeCone))/8					//rayon du cylindre a enlever
 		                        }
@@ -246,19 +292,20 @@ lathe{
  					pigment{Jade}						// color of leaves
 
 
-	       	}
+	       	
+			   }
+			}
 			#local j=0;
 			union {
 				#while(j<nombreDeBoule)						//ajout de nombreDeBoule Boule
-		     		union {
-					#local rayonJ = rayon*(1-i/nombreDeCone);	 
-					#local pointX=rayonJ*cos (2*Pi*j/nombreDeBoule+rot);
-					#local pointY=rayonJ*sin (2*Pi*j/nombreDeBoule+rot);
+		     		
+					#local pointX=rayonConeBase*cos (2*Pi*j/nombreDeBoule+rot);
+					#local pointY=rayonConeBase*sin (2*Pi*j/nombreDeBoule+rot);
 					#local pointZ=hauteur+i*ecartHauteur ;
-					#local latheTranslationX=	(rayon*(1-i/nombreDeCone))*cos (2*Pi*j/nombreDeBoule+rot);
-					#local latheTranslationY=(rayon*(1-i/nombreDeCone))*sin(2*Pi*j/nombreDeBoule+rot);
+					#local latheTranslationX=	(rayonConeBase)*cos (2*Pi*j/nombreDeBoule+rot)	;
+					#local latheTranslationY=(rayonConeBase)*sin(2*Pi*j/nombreDeBoule+rot);
 					#local latheTranslationZ=hauteur+i*ecartHauteur-hFicelle-0.2; // 0.2 est lier aux points dans la lathe
-					
+					union {
 					 union {
 						 sphere{										//creation des boules rouges
 				     		 		<pointX, pointY, pointZ> 
@@ -278,21 +325,21 @@ lathe{
 					 #if( mod(i,3)=0)
 					 union {
 					 	createLathe( <0, -5 >, <3, -2 >, <3, 0 > , <3, 0.5>, cLathe1, latheTranslationX, latheTranslationY, latheTranslationZ)
-						createLathe( <3, 0.5>, <2, 2 >, <2, 1 >, <rFicelle*10, 2 >, cLathe1,  latheTranslationX, latheTranslationY, latheTranslationZ)
+						createLathe( <3, 0.5>, <2, 2 >, <2, 1 >, <rFicelle*10, 2 >, cLathe2,  latheTranslationX, latheTranslationY, latheTranslationZ)
 						 }
 					 
 					 #end
 					 #if( mod(i,3)=1)
 					  union {
 					  	createLathe( <1, -5 >, <2, -4 >, <2, -3 > , <1, -2>, cLathe2,  latheTranslationX, latheTranslationY, latheTranslationZ)
-						createLathe(<1, -2>, <3, -1 >, <3, 0 >, <rFicelle*10, 2 >, cLathe2,  latheTranslationX, latheTranslationY, latheTranslationZ)
+						createLathe(<1, -2>, <3, -1 >, <3, 0 >, <rFicelle*10, 2 >, cLathe3,  latheTranslationX, latheTranslationY, latheTranslationZ)
 						 }
 					 
 					 #end
 					  #if( mod(i,3)=2)
 					  union{
 					  	createLathe(  <0, -2 >, <1, -1>, <2, 0 >, <3,0>,cLathe3,  latheTranslationX, latheTranslationY, latheTranslationZ)
-						createLathe(  <3, 0 >, <3, 1>, <2, 2 >, <rFicelle*10, 2 >, cLathe3,  latheTranslationX, latheTranslationY, latheTranslationZ)
+						createLathe(  <3, 0 >, <3, 1>, <2, 2 >, <rFicelle*10, 2 >, cLathe1,  latheTranslationX, latheTranslationY, latheTranslationZ)
 					  }
 					 #end
 
@@ -300,20 +347,20 @@ lathe{
 	                  #declare j=j+1;
 	               #end
 			}
-             #local nombreDeBoule = nombreDeBoule-5;
-             #local nombreDeCylindre=nombreDeBoule;
-             #local rot=2*Pi/nombreDeBoule/2;
-	       #local i=i+1;
+		}
+             #declare nombreDeBoule = nombreDeBoule-5;
+             #declare nombreDeCylindre=nombreDeBoule;
+             #declare rot=2*Pi/nombreDeBoule/2;
+	       	#local i=i+1;
 	       #end
-	       union {
-	       sphere{										//creation des boules rouges
-			     	<	0, 0, hauteur+nombreDeCone*ecartHauteur >  //position de la boule au sommet
-	     		 		0.5				
-					pigment {Black}
-	                  }
+		}
 
-	       }
+
+	       
 	} 
 	
 }
-object{sapin}
+#end
+
+#declare sapin1=sapin()
+object{sapin1}
