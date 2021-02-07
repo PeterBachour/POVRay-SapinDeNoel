@@ -9,3 +9,5 @@ povray cam.ini
 ```
 
 Vous pouvez choisir dedans la taille de l'image qui vous corresponds, ainsi que combien d'images vous voulez générer.
+
+<img src="sapin.gif" width="640" height="512" />
