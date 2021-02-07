@@ -58,7 +58,7 @@ background {White}								  	  // fond d'ecran blanc
 #declare nombreDeCylindre=nombreDeBoule;
 
 
-//ne pas multiplier 
+
 #macro Bspline4(step,P0,P1,P2,P3,P4,eq)
 	 #local eq=(pow((1-step),4)*P0+4*step*pow((1-step),3)*P1+6*pow(step,2)*pow((1-step),2)*P2+4*pow(step,3)*(1-step)*P3+pow(step,4)*P4);
 #end
