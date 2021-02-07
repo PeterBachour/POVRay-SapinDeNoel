@@ -9,13 +9,7 @@ global_settings { //max_trace_level 20
 assumed_gamma 1.0
 }
 
-camera {
-    location <0.2*sca,1*sca,14.5> 					// location of camera
-    look_at <0,0,10>								// ou la camera va se fixer 
-    sky <0,0,1> 									// pour avoir le Z en haut
-    right <-image_width/image_height,0,0>	 	    // pour un repere direct
-    rotate<0,0, -360*(clock+0.10)>
-}
+
 
 light_source { <0.4*sca,1*sca,14.5> White }		    // light source
 light_source { <-0.4*sca,1*sca,14.5> White }       	// light source          
@@ -57,7 +51,13 @@ background {White}								  	  // fond d'ecran blanc
 #declare rot=2*Pi/nombreDeBoule/2;
 #declare nombreDeCylindre=nombreDeBoule;
 
-
+camera {
+    location <0.2*sca,1*sca,14.5> 					// location of camera
+    look_at <0,0,(hauteur+nombreDeCone*ecartHauteur)/2>								// ou la camera va se fixer 
+    sky <0,0,1> 									// pour avoir le Z en haut
+    right <-image_width/image_height,0,0>	 	    // pour un repere direct
+    rotate<0,0, -360*(clock+0.10)>
+}
 
 #macro Bspline4(step,P0,P1,P2,P3,P4,eq)
 	 #local eq=(pow((1-step),4)*P0+4*step*pow((1-step),3)*P1+6*pow(step,2)*pow((1-step),2)*P2+4*pow(step,3)*(1-step)*P3+pow(step,4)*P4);
